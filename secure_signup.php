@@ -1,0 +1,249 @@
+<!doctype html>
+<html>
+<head>
+	<link rel='stylesheet' href='page_css.css'>
+	<title> Student's Hangout </title>
+	<script type='text/javascript'>
+		function sec() {
+			var name=document.f1.n1.value;
+			var email=document.f1.e1.value;
+			var age=document.f1.a1.value;
+			var password=document.f1.p1.value;
+			
+			
+			if(name.length==0||email.length==0||age.length==0||password.length==0) {
+				
+				if(name.length==0) {
+				s1.innerHTML="<font color='red'>Field is Required</font>";
+				
+				}
+				
+				if(email.length==0) {
+				s2.innerHTML="<font color='red'>Field is Required</font>";
+				
+				}
+				
+				if(age.length==0) {
+				s3.innerHTML="<font color='red'>Field is Required</font>";
+				
+				}
+				
+				if(password.length==0) {
+				s4.innerHTML="<font color='red'>Field is Required</font>";
+				
+				}
+			}
+			
+			else if (name.length>50||email.length>50||password.length>50) {
+				
+				if(name.length>50) {
+				s5.innerHTML="<font color='red'>Characters should be less than 50 </font>";
+				
+				}
+				
+				if(email.length>50) {
+				s6.innerHTML="<font color='red'>Characters should be less than 50 </font>";
+				
+				}
+				
+				if(password.length>50) {
+				s7.innerHTML="<font color='red'>Characters should be less than 50 </font>";
+				
+				}
+			}
+			
+			else {
+				document.f1.submit();
+			}
+			
+			
+			
+						
+			
+		}
+	</script>
+</head>
+<body>
+		<table cellpadding='3' cellspacing='3' class='tab_main'>
+			<!--Logo-->
+			<tr>
+				<td  colspan='5'>
+					<div>
+						<img src='images/newlogo.jpeg' width='100%'>
+						<div class="logo-text">
+							<font style="color:white; font-family:'PT Sans Narrow','Tahoma',sans-serif;">
+								<font style="font-size:2em; font-weight:bold;">
+									Socioexplore <br>
+								</font>
+								<font style="font-size=1em; font-weight:normal">
+									CS 4270 Internet Programming Final Project
+								</font>
+							</font>
+						</div>
+					</div>
+				</td>
+			</tr>
+			<!--Nav_Tabs-->
+			<tr align='center' bgcolor='lightgrey' class='td_bor'>
+				<td width='5%'> <a href='index.php'> Home </a></td>
+				<td width='5%'> <a href='login.php'>Login </a></td>
+				<td width='5%'> <a href='secure_signup.php'>Sign-up </a></td> 
+				<td width='5%'> <a href='contact-us.html'>Contact Me </a></td>
+				<td width='5%'> <a href='about-us.html'>About Me </a></td>
+			</tr>
+			
+			<tr>
+				<td> <hr> </td> 
+				<td> <hr> </td> 
+				<td> <hr> </td> 
+				<td> <hr> </td> 
+				<td> <hr> </td> 
+			</tr>
+			
+			<tr align='center'> 
+				<td colspan='5'>
+					<form method='POST' name='f1' action='<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>'>
+						<table>
+							<tr>
+								<td> Name: </td> <td> <input type='text' name='n1' maxlength='50'> </td> <td> <span id='s1'> </span> </td> <td> <span id='s5'> </span> </td>
+							</tr>
+							<tr>
+								<td> Email: </td> <td> <input type='email' name='e1' maxlength='50'> </td> <td> <span id='s2'> </span> </td> <td> <span id='s6'> </span> </td>
+							</tr>
+							<tr>
+								<td> Age: </td> <td> <input type='number' name='a1' min='18' max='27'> </td> <td> <span id='s3'> </span> </td>
+							</tr>
+							<tr>
+							<td> Gender: </td>  <td> <select name='g1'> 
+												<option value='M'>Male
+												<option value='F'>Female
+											  </select> </td>
+								</td>
+							</tr>
+							
+							<tr>
+								<td> Password: </td> <td> <input type='password' name='p1' maxlength='50'> </td> <td> <span id='s4'> </span> </td> <td> <span id='s7'> </span> </td>
+							</tr>
+							
+							<tr>
+								<td> <br> <input type='button' value='Sign-up' name='s1' onclick='sec()'> </td> <td> <br> OR  <a href='login.php'>Login</a></td>
+							</tr>
+						</table>
+					</form>
+				</td>
+			</tr>
+	<?php
+	
+	$config = parse_ini_file('/home/jfreela3/public_html/Final-Project/netID/config.ini');
+	
+	$name=$email=$age=$gender=$password=$count=$count_id="";
+	if($_SERVER["REQUEST_METHOD"]=="POST")
+	{
+		function sec($data)
+		{
+			$data=trim($data);
+			$data=stripslashes($data);
+			$data=htmlspecialchars($data);
+			return $data;
+		}
+		
+		$name=sec($_POST["n1"]);
+		$email=sec($_POST["e1"]);
+		$age=sec($_POST["a1"]);
+		$gender=sec($_POST["g1"]);
+		$password=sec($_POST["p1"]);
+		$verify_code = rand(100000, 999999); //gotcha4 Security enhancement here
+
+		$resid=MySQLi_Connect($config['servername'],$config['username'],$config['password'],$config['dbname']);
+		
+		if(MySQLi_Connect_Errno())
+		{
+			echo "<tr align='center'> <td colspan='5'> Failed to connect to MySQL </td> </tr>";
+		}
+		else
+		{
+			$check_email=MySQLi_Query($resid,"select name from students where email='".$email."'");
+			$r_email=MySQLi_Fetch_Row($check_email);
+		
+			if($r_email)
+			//Check if email has already been registered
+			{
+				echo "<tr align='center'> <td colspan='5'> <font color='red'> Email already Registered, Registration Failed!  </font>  </td> </tr>";
+			}
+			else
+			//Add account information to students table
+			{
+				$count=MySQLi_Query($resid,"select (max(id)+1) as count  from students");
+				$count_id=MySQLi_Fetch_Assoc($count);
+				if($count_id["count"])
+				{
+					$query1="insert into students values (" . $count_id["count"] . ",'$name','$email',$age,'$gender','$password')";
+				}
+				else
+				{
+					$query1="insert into students values (1,'$name','$email',$age,'$gender','$password')";
+				}
+				
+				$count_id["count"] ? $user_count = $count_id["count"] : $user_count = 1;
+				//I still need the new user_id for the new entry in verify_table, so I hand $count_id["count"] over to $user_count before I overwrite it
+				
+				$count=MySQLi_Query($resid,"select (max(id)+1) as count from verify_email");
+				$count_id=MySQLi_Fetch_Assoc($count);
+				if($count_id["count"])
+				{
+					$query2="insert into verify_email (id, user_id, email, code) values (" . $count_id["count"] . ",'$user_count','$email','$verify_code')";
+				}
+				else
+				{
+					$query2="insert into verify_email (id, user_id, email, code) values (1,'$user_count','$email','$verify_code')";
+				}
+				
+				$res=MySQLi_Query($resid,$query1);
+				$user_error = MySQLi_Error($resid);
+				
+				$res2=MySQLi_Query($resid,$query2);
+				$code_error = MySQLi_Error($resid);
+				
+				if($res && $res2)
+				{
+				echo "<tr align='center'> <td colspan='5'> <font color='green'> Registration Successful! </font> You may login now from here: <a href='login.php'>Login</a></td> </tr>";
+				}
+				else
+				{
+					echo "<tr align='center'> <td colspan='5'> <font color='red'> Registration failed! </font> </td> </tr> <p>";
+					echo $user_error . "<br>" . $code_error;
+					echo "</p>";
+				}
+			}
+			
+		MySQLi_Close($resid);
+		}
+	}
+	?> 			
+		</table>
+			<footer align='center'>
+			&copy; All Rights Reserved.	Click <a href="http://www.github.com/abhn/simple-php-mysql-project">here</a> for Github original source.	
+			</footer>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
